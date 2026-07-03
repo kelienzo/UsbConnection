@@ -18,8 +18,8 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import java.nio.charset.StandardCharsets
 
 class UsbConnectionManager(private val context: Context) {
@@ -55,13 +55,12 @@ class UsbConnectionManager(private val context: Context) {
     private val _connectionState = MutableStateFlow<UsbState>(UsbState.Disconnected)
     val connectionState: StateFlow<UsbState> = _connectionState
 
-    private val _incomingData = MutableSharedFlow<ByteArray>(
+    private val _incomingData = MutableSharedFlow<String>(
         replay = 0,
         extraBufferCapacity = 64,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
-
-    val incomingData: SharedFlow<ByteArray> = _incomingData
+    val incomingData = _incomingData.asSharedFlow()
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -201,7 +200,7 @@ class UsbConnectionManager(private val context: Context) {
         override fun onNewData(data: ByteArray) {
             Log.d(TAG, "Received: ${String(data)}")
             Log.d(TAG, "Received US ASCII: ${String(data, StandardCharsets.US_ASCII)}")
-            _incomingData.tryEmit(data)
+            _incomingData.tryEmit(String(data))
         }
 
         override fun onRunError(e: Exception) {
@@ -214,8 +213,8 @@ class UsbConnectionManager(private val context: Context) {
 //        usbConnectionManager.write("C,1\r\n")
 //        usbConnectionManager.write("C,VEND,1.20\r\n")
         try {
-            val bytes = "$command\r\n".toByteArray()
-//            val bytes = command.toByteArray()
+//            val bytes = "$command\r\n".toByteArray()
+            val bytes = command.toByteArray()
 //            val bytes = command.toByteArray(StandardCharsets.US_ASCII)
             usbPort?.write(bytes, WRITE_TIMEOUT)
             Log.d(TAG, "TX -> $command")
@@ -232,7 +231,7 @@ class UsbConnectionManager(private val context: Context) {
         }
     }
 
-    fun disconnect() {
+    private fun disconnect() {
         Log.d(TAG, "Disconnecting USB Device")
         _connectionState.value = UsbState.Disconnected
         try {
@@ -267,15 +266,15 @@ class UsbConnectionManager(private val context: Context) {
         }
     }
 
-    fun purge() {
-        try {
-            usbPort?.purgeHwBuffers(true, true)
-        } catch (t: Throwable) {
-            t.printStackTrace()
-        }
-    }
+//    fun purge() {
+//        try {
+//            usbPort?.purgeHwBuffers(true, true)
+//        } catch (t: Throwable) {
+//            t.printStackTrace()
+//        }
+//    }
 
-    fun Intent.usbDevice(): UsbDevice? {
+    private fun Intent.usbDevice(): UsbDevice? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
         } else {
