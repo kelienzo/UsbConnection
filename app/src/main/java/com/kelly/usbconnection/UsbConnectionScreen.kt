@@ -32,17 +32,25 @@ fun UsbConnectionScreen(
         ) {
             when (usbState) {
                 UsbState.Connected -> {
-                    Text("STATUS: ${uiState.status.orEmpty()}")
-                    Text("DISPLAY: ${uiState.displayMessage.orEmpty()}")
+                    uiState.run {
+                        Text("STATUS: ${status.orEmpty()}")
+                        amount?.let { Text("Amount: $it") }
+                    }
 
                     Button(onClick = { onAction(UsbConnectionScreenAction.OnEnableDevice) }) {
                         Text("Enable Device")
                     }
 
                     Button(
-                        enabled = uiState.run { status != null && status == "ENABLED" },
+                        enabled = uiState.run { status != null },
                         onClick = { onAction(UsbConnectionScreenAction.DisplayMessage) }) {
                         Text("Display message")
+                    }
+
+                    Button(
+                        enabled = uiState.run { status != null },
+                        onClick = { onAction(UsbConnectionScreenAction.StartVending) }) {
+                        Text("Start vending")
                     }
                 }
 
@@ -68,4 +76,5 @@ private fun UsbConnectionScreenPrev() = UsbConnectionTheme {
 sealed interface UsbConnectionScreenAction {
     data object OnEnableDevice : UsbConnectionScreenAction
     data object DisplayMessage : UsbConnectionScreenAction
+    data object StartVending : UsbConnectionScreenAction
 }

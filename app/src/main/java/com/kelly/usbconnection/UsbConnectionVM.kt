@@ -1,5 +1,6 @@
 package com.kelly.usbconnection
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,11 +20,15 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
             start()
 
             incomingData.onEach { response ->
-                val (command, event, result) = response.split(",")
+                val (command, event, param1, param2, param3) = response.split(",")
                 when (event) {
-                    "STATUS" -> _uiState.update { it.copy(status = result) }
-                    "VEND" -> {}
-                    "DISPLAY" -> _uiState.update { it.copy(displayMessage = result) }
+                    "STATUS" -> {
+                        if (param1 == "VEND") {
+//                            c,STATUS,VEND,<price>,<item_number>
+                            Log.d("UsbConnectionVM", "Amount: $param2, Item Number: $param3")
+                            _uiState.update { it.copy(amount = param2) }
+                        } else _uiState.update { it.copy(status = param1) }
+                    }
                 }
             }.launchIn(viewModelScope)
         }
@@ -33,6 +38,7 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
         when (action) {
             UsbConnectionScreenAction.OnEnableDevice -> writeData("C,1")
             UsbConnectionScreenAction.DisplayMessage -> writeData("C,DISPLAY,Hello!")
+            UsbConnectionScreenAction.StartVending -> writeData("C,START,200")
         }
     }
 
@@ -46,6 +52,6 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
 
     data class UiState(
         val status: String? = null,
-        val displayMessage: String? = null,
+        val amount: String? = null
     )
 }
