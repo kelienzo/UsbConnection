@@ -42,6 +42,11 @@ fun UsbConnectionScreen(
                     }
 
                     Button(
+                        onClick = { onAction(UsbConnectionScreenAction.Stop) }) {
+                        Text("Stop")
+                    }
+
+                    Button(
                         enabled = uiState.run { status != null },
                         onClick = { onAction(UsbConnectionScreenAction.DisplayMessage) }) {
                         Text("Display message")
@@ -51,6 +56,12 @@ fun UsbConnectionScreen(
                         enabled = uiState.run { status != null },
                         onClick = { onAction(UsbConnectionScreenAction.StartVending) }) {
                         Text("Start vending")
+                    }
+
+                    Button(
+                        enabled = uiState.run { status != null },
+                        onClick = { onAction(UsbConnectionScreenAction.EndVending) }) {
+                        Text("End vending")
                     }
                 }
 
@@ -77,4 +88,6 @@ sealed interface UsbConnectionScreenAction {
     data object OnEnableDevice : UsbConnectionScreenAction
     data object DisplayMessage : UsbConnectionScreenAction
     data object StartVending : UsbConnectionScreenAction
+    data object EndVending : UsbConnectionScreenAction
+    data object Stop : UsbConnectionScreenAction
 }

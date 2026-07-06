@@ -20,12 +20,21 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
             start()
 
             incomingData.onEach { response ->
-                val (command, event, param1, param2, param3) = response.split(",")
+                val parts = response.split(",")
+
+                val command = parts.getOrNull(0)
+                val event = parts.getOrNull(1)
+                val param1 = parts.getOrNull(2)
+                val param2 = parts.getOrNull(3)
+                val param3 = parts.getOrNull(4)
                 when (event) {
                     "STATUS" -> {
-                        if (param1 == "VEND") {
+                        if (param1.orEmpty() == "VEND") {
 //                            c,STATUS,VEND,<price>,<item_number>
-                            Log.d("UsbConnectionVM", "Amount: $param2, Item Number: $param3")
+                            Log.d(
+                                "UsbConnectionVM",
+                                "Amount: ${param2.orEmpty()}, Item Number: ${param3.orEmpty()}"
+                            )
                             _uiState.update { it.copy(amount = param2) }
                         } else _uiState.update { it.copy(status = param1) }
                     }
@@ -37,8 +46,10 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
     fun onAction(action: UsbConnectionScreenAction) {
         when (action) {
             UsbConnectionScreenAction.OnEnableDevice -> writeData("C,1")
+            UsbConnectionScreenAction.Stop -> writeData("C,STOP")
             UsbConnectionScreenAction.DisplayMessage -> writeData("C,DISPLAY,Hello!")
-            UsbConnectionScreenAction.StartVending -> writeData("C,START,200")
+            UsbConnectionScreenAction.StartVending -> writeData("C,START,1")
+            UsbConnectionScreenAction.EndVending -> writeData("C,VEND,${uiState.value.amount.orEmpty()}")
         }
     }
 

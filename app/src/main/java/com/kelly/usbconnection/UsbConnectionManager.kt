@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import java.nio.charset.StandardCharsets
 
 class UsbConnectionManager(private val context: Context) {
 
@@ -201,9 +200,9 @@ class UsbConnectionManager(private val context: Context) {
 
     private val serialInputOutputListener = object : SerialInputOutputManager.Listener {
         override fun onNewData(data: ByteArray) {
-            Log.d(TAG, "Received: ${String(data)}")
-            Log.d(TAG, "Received US ASCII: ${String(data, StandardCharsets.US_ASCII)}")
-            _incomingData.tryEmit(String(data))
+            val responseData = String(data)
+            Log.d(TAG, "Received: $responseData")
+            _incomingData.tryEmit(responseData)
         }
 
         override fun onRunError(e: Exception) {
@@ -216,8 +215,7 @@ class UsbConnectionManager(private val context: Context) {
 //        usbConnectionManager.write("C,1\r\n")
 //        usbConnectionManager.write("C,VEND,1.20\r\n")
         try {
-//            val bytes = "$command\r\n".toByteArray()
-            val bytes = command.toByteArray()
+            val bytes = "$command\r\n".toByteArray()
 //            val bytes = command.toByteArray(StandardCharsets.US_ASCII)
             usbPort?.write(bytes, WRITE_TIMEOUT)
             Log.d(TAG, "TX -> $command")
