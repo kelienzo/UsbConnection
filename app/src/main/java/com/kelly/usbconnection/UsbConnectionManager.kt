@@ -76,6 +76,7 @@ class UsbConnectionManager(private val context: Context) {
                 }
 
                 ACTION_USB_PERMISSION -> {
+                    Log.d(TAG, "Usb Permission Block")
                     val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
                     if (granted) {
                         intent.usbDevice()?.let {
@@ -148,8 +149,9 @@ class UsbConnectionManager(private val context: Context) {
         val permissionIntent = PendingIntent.getBroadcast(
             context,
             0,
-            Intent(ACTION_USB_PERMISSION),
-            PendingIntent.FLAG_IMMUTABLE
+            Intent(ACTION_USB_PERMISSION).setPackage(context.packageName),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+//            PendingIntent.FLAG_IMMUTABLE
         )
         usbManager.requestPermission(device, permissionIntent)
     }
@@ -159,6 +161,7 @@ class UsbConnectionManager(private val context: Context) {
             Log.d(TAG, "Opening USB Connection...")
             val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
             usbDriver = drivers.firstOrNull { it.device.deviceId == device.deviceId }
+//            usbDriver = UsbSerialProber.getDefaultProber().probeDevice(device)
             if (usbDriver == null) {
                 Log.e(TAG, "No compatible serial driver found")
                 _connectionState.value = UsbState.Error("No USB Serial Driver")
@@ -255,16 +258,16 @@ class UsbConnectionManager(private val context: Context) {
         usbDriver = null
     }
 
-    fun isConnected() = usbPort != null && usbConnection != null && ioManager != null
+//    fun isConnected() = usbPort != null && usbConnection != null && ioManager != null
+//
+//    fun currentDevice() = usbDriver?.device
 
-    fun currentDevice() = usbDriver?.device
-
-    fun reconnect() {
-        currentDevice()?.let {
-            disconnect()
-            connect(it)
-        }
-    }
+//    fun reconnect() {
+//        currentDevice()?.let {
+//            disconnect()
+//            connect(it)
+//        }
+//    }
 
 //    fun purge() {
 //        try {
