@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,7 +28,8 @@ fun UsbConnectionScreen(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(p),
+                .padding(p)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -41,27 +44,46 @@ fun UsbConnectionScreen(
                         Text("Enable Device")
                     }
 
-                    Button(
-                        onClick = { onAction(UsbConnectionScreenAction.Stop) }) {
-                        Text("Stop")
+                    Button(onClick = { onAction(UsbConnectionScreenAction.OnDisableDevice) }) {
+                        Text("Disable Device")
+                    }
+
+                    Button(onClick = { onAction(UsbConnectionScreenAction.OnSetAlwaysIdle) }) {
+                        Text("Set Always Idle")
+                    }
+
+                    Button(onClick = { onAction(UsbConnectionScreenAction.OnSetCurrency) }) {
+                        Text("Set Currency")
                     }
 
                     Button(
                         enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.DisplayMessage) }) {
+                        onClick = { onAction(UsbConnectionScreenAction.StopVending) }) {
+                        Text("Stop vending session")
+                    }
+
+                    Button(
+                        enabled = uiState.run { status != null },
+                        onClick = { onAction(UsbConnectionScreenAction.OnDisplayMessage) }) {
                         Text("Display message")
                     }
 
                     Button(
                         enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.StartVending) }) {
-                        Text("Start vending")
+                        onClick = { onAction(UsbConnectionScreenAction.OnStartVending) }) {
+                        Text("Start vending request")
                     }
 
                     Button(
                         enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.EndVending) }) {
-                        Text("End vending")
+                        onClick = { onAction(UsbConnectionScreenAction.OnApproveVending) }) {
+                        Text("Approve vending request")
+                    }
+
+                    Button(
+                        enabled = uiState.run { status != null },
+                        onClick = { onAction(UsbConnectionScreenAction.OnDenyVending) }) {
+                        Text("Deny vending request")
                     }
                 }
 
@@ -86,8 +108,12 @@ private fun UsbConnectionScreenPrev() = UsbConnectionTheme {
 
 sealed interface UsbConnectionScreenAction {
     data object OnEnableDevice : UsbConnectionScreenAction
-    data object DisplayMessage : UsbConnectionScreenAction
-    data object StartVending : UsbConnectionScreenAction
-    data object EndVending : UsbConnectionScreenAction
-    data object Stop : UsbConnectionScreenAction
+    data object OnDisableDevice : UsbConnectionScreenAction
+    data object OnSetAlwaysIdle : UsbConnectionScreenAction
+    data object OnSetCurrency : UsbConnectionScreenAction
+    data object OnDisplayMessage : UsbConnectionScreenAction
+    data object OnStartVending : UsbConnectionScreenAction
+    data object OnApproveVending : UsbConnectionScreenAction
+    data object OnDenyVending : UsbConnectionScreenAction
+    data object StopVending : UsbConnectionScreenAction
 }

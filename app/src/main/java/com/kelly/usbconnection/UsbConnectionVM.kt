@@ -31,6 +31,7 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
                     "STATUS" -> {
                         if (param1.orEmpty() == "VEND") {
 //                            c,STATUS,VEND,<price>,<item_number>
+                            _uiState.update { it.copy(amount = null) }
                             Log.d(
                                 "UsbConnectionVM",
                                 "Amount: ${param2.orEmpty()}, Item Number: ${param3.orEmpty()}"
@@ -38,6 +39,8 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
                             _uiState.update { it.copy(amount = param2) }
                         } else _uiState.update { it.copy(status = param1) }
                     }
+
+                    "SET" -> {}
                 }
             }.launchIn(viewModelScope)
         }
@@ -46,10 +49,21 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
     fun onAction(action: UsbConnectionScreenAction) {
         when (action) {
             UsbConnectionScreenAction.OnEnableDevice -> writeData("C,1")
-            UsbConnectionScreenAction.Stop -> writeData("C,STOP")
-            UsbConnectionScreenAction.DisplayMessage -> writeData("C,DISPLAY,Hello!")
-            UsbConnectionScreenAction.StartVending -> writeData("C,START,1")
-            UsbConnectionScreenAction.EndVending -> writeData("C,VEND,${uiState.value.amount.orEmpty()}")
+            UsbConnectionScreenAction.OnDisableDevice -> writeData("C,0")
+            UsbConnectionScreenAction.OnSetAlwaysIdle -> writeData("C,SETCONF,mdb-always-idle=1")
+            UsbConnectionScreenAction.OnSetCurrency -> writeData("C,SETCONF,mdb-currency-code=0x1566")
+            UsbConnectionScreenAction.StopVending -> writeData("C,STOP")
+            UsbConnectionScreenAction.OnDisplayMessage -> writeData("C,DISPLAY,Hello!")
+            UsbConnectionScreenAction.OnStartVending -> writeData("C,START,1")
+            UsbConnectionScreenAction.OnApproveVending -> {
+                writeData("C,VEND,${uiState.value.amount.orEmpty()}")
+                _uiState.update { it.copy(amount = null) }
+            }
+
+            UsbConnectionScreenAction.OnDenyVending -> {
+                writeData("C,VEND,-1")
+                _uiState.update { it.copy(amount = null) }
+            }
         }
     }
 
