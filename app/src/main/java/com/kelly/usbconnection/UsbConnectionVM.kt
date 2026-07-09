@@ -15,6 +15,8 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
+    var isCurrency = false
+
     init {
         usbConnectionManager.run {
             start()
@@ -40,7 +42,9 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
                         } else _uiState.update { it.copy(status = param1) }
                     }
 
-                    "SET" -> {}
+                    "SET" -> {
+                        if (isCurrency && param1 == "OK") _uiState.update { it.copy(currency = "NGN") }
+                    }
                 }
             }.launchIn(viewModelScope)
         }
@@ -51,11 +55,15 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
             UsbConnectionScreenAction.OnEnableDevice -> writeData("C,1")
             UsbConnectionScreenAction.OnDisableDevice -> {
                 writeData("C,0")
-                _uiState.value = UiState()
+                _uiState.update { it.copy(status = null, amount = null) }
             }
 
             UsbConnectionScreenAction.OnSetAlwaysIdle -> writeData("C,SETCONF,mdb-always-idle=1")
-            UsbConnectionScreenAction.OnSetCurrency -> writeData("C,SETCONF,mdb-currency-code=0x1566")
+            UsbConnectionScreenAction.OnSetCurrency -> {
+                writeData("C,SETCONF,mdb-currency-code=0x1566")
+                isCurrency = true
+            }
+
             UsbConnectionScreenAction.StopVending -> {
                 writeData("C,STOP")
                 resetAmount()
@@ -89,6 +97,7 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
 
     data class UiState(
         val status: String? = null,
-        val amount: String? = null
+        val amount: String? = null,
+        val currency: String? = null
     )
 }

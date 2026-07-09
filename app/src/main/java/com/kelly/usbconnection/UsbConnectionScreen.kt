@@ -38,7 +38,8 @@ fun UsbConnectionScreen(
                 UsbState.Connected -> {
                     uiState.run {
                         Text("STATUS: ${status.orEmpty()}")
-                        amount?.let { Text("Amount: $it") }
+                        currency?.let { Text("CURRENCY: $it") }
+                        amount?.let { Text("AMOUNT: $it") }
 
                         val shouldEnable =
                             status != null && status != "INACTIVE" && status != "DISABLED"
