@@ -24,6 +24,7 @@ fun UsbConnectionScreen(
     uiState: UsbConnectionVM.UiState,
     onAction: (UsbConnectionScreenAction) -> Unit
 ) {
+
     Scaffold(modifier = modifier) { p ->
         Column(
             modifier = modifier
@@ -38,52 +39,63 @@ fun UsbConnectionScreen(
                     uiState.run {
                         Text("STATUS: ${status.orEmpty()}")
                         amount?.let { Text("Amount: $it") }
-                    }
 
-                    Button(onClick = { onAction(UsbConnectionScreenAction.OnEnableDevice) }) {
-                        Text("Enable Device")
-                    }
+                        val shouldEnable =
+                            status != null && status != "INACTIVE" && status != "DISABLED"
 
-                    Button(onClick = { onAction(UsbConnectionScreenAction.OnDisableDevice) }) {
-                        Text("Disable Device")
-                    }
+                        Button(
+                            enabled = !shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnSetAlwaysIdle) }) {
+                            Text("Set Always Idle")
+                        }
 
-                    Button(onClick = { onAction(UsbConnectionScreenAction.OnSetAlwaysIdle) }) {
-                        Text("Set Always Idle")
-                    }
+                        Button(
+                            enabled = !shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnSetCurrency) }) {
+                            Text("Set Currency")
+                        }
 
-                    Button(onClick = { onAction(UsbConnectionScreenAction.OnSetCurrency) }) {
-                        Text("Set Currency")
-                    }
+                        Button(
+                            enabled = !shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnEnableDevice) }) {
+                            Text("Enable Device")
+                        }
 
-                    Button(
-                        enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.StopVending) }) {
-                        Text("Stop vending session")
-                    }
+                        Button(
+                            enabled = shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnDisableDevice) }) {
+                            Text("Disable Device")
+                        }
 
-                    Button(
-                        enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.OnDisplayMessage) }) {
-                        Text("Display message")
-                    }
+                        Button(
+                            enabled = shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.StopVending) }) {
+                            Text("Stop vending session")
+                        }
 
-                    Button(
-                        enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.OnStartVending) }) {
-                        Text("Start vending request")
-                    }
+                        Button(
+                            enabled = shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnDisplayMessage) }) {
+                            Text("Display message")
+                        }
 
-                    Button(
-                        enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.OnApproveVending) }) {
-                        Text("Approve vending request")
-                    }
+                        Button(
+                            enabled = shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnStartVending) }) {
+                            Text("Start vending request")
+                        }
 
-                    Button(
-                        enabled = uiState.run { status != null },
-                        onClick = { onAction(UsbConnectionScreenAction.OnDenyVending) }) {
-                        Text("Deny vending request")
+                        Button(
+                            enabled = shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnApproveVending) }) {
+                            Text("Approve vending request")
+                        }
+
+                        Button(
+                            enabled = shouldEnable,
+                            onClick = { onAction(UsbConnectionScreenAction.OnDenyVending) }) {
+                            Text("Deny vending request")
+                        }
                     }
                 }
 

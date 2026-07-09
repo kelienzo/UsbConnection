@@ -49,22 +49,34 @@ class UsbConnectionVM(val usbConnectionManager: UsbConnectionManager) : ViewMode
     fun onAction(action: UsbConnectionScreenAction) {
         when (action) {
             UsbConnectionScreenAction.OnEnableDevice -> writeData("C,1")
-            UsbConnectionScreenAction.OnDisableDevice -> writeData("C,0")
+            UsbConnectionScreenAction.OnDisableDevice -> {
+                writeData("C,0")
+                _uiState.value = UiState()
+            }
+
             UsbConnectionScreenAction.OnSetAlwaysIdle -> writeData("C,SETCONF,mdb-always-idle=1")
             UsbConnectionScreenAction.OnSetCurrency -> writeData("C,SETCONF,mdb-currency-code=0x1566")
-            UsbConnectionScreenAction.StopVending -> writeData("C,STOP")
+            UsbConnectionScreenAction.StopVending -> {
+                writeData("C,STOP")
+                resetAmount()
+            }
+
             UsbConnectionScreenAction.OnDisplayMessage -> writeData("C,DISPLAY,Hello!")
             UsbConnectionScreenAction.OnStartVending -> writeData("C,START,1")
             UsbConnectionScreenAction.OnApproveVending -> {
                 writeData("C,VEND,${uiState.value.amount.orEmpty()}")
-                _uiState.update { it.copy(amount = null) }
+                resetAmount()
             }
 
             UsbConnectionScreenAction.OnDenyVending -> {
                 writeData("C,VEND,-1")
-                _uiState.update { it.copy(amount = null) }
+                resetAmount()
             }
         }
+    }
+
+    private fun resetAmount() {
+        _uiState.update { it.copy(amount = null) }
     }
 
     private fun writeData(data: String) {
